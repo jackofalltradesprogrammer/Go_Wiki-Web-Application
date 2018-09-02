@@ -73,9 +73,15 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
-func makeHandler(fn func(http.ResponseWriter, *http.ReadRequest, string)) http.HandleFunc {
+func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Here we will extract the page title from the Request,
+		m := validPath.FindStringSubmatch(r.URL.Path)
+		if m == nil {
+			http.NotFound(w, r)
+			return
+		}
+		fn(w, r, m[2]) // The title is teh second subexpression
 		// and call the povided handler 'fn'
 	}
 }
