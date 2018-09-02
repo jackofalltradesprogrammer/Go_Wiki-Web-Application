@@ -34,7 +34,7 @@ func loadPage(title string) (*Page, error) {
 	return &Page{Title: title, Body: body}, nil
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
+func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	title, err := getTitle(w, r)
 	if err != nil {
 		return
@@ -46,7 +46,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "view", p)
 }
 
-func editHandler(w http.ResponseWriter, r *http.Request) {
+func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	title, err := getTitle(w, r)
 	if err != nil {
 		return
@@ -58,16 +58,26 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "edit", p)
 }
 
-func saveHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/save/"):]
+func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
+	title, err := getTitle(w, r)
+	if err != nil {
+		return
+	}
 	body := r.FormValue("body")
 	p := &Page{Title: title, Body: []byte(body)} // body is a string value
-	err := p.save()
+	err = p.save()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
+}
+
+func makeHandler(fn func(http.ResponseWriter, *http.ReadRequest, string)) http.HandleFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Here we will extract the page title from the Request,
+		// and call the povided handler 'fn'
+	}
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
