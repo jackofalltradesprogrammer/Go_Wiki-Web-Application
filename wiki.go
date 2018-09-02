@@ -34,10 +34,8 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/view/", viewHandler)
+	http.HandleFunc("/edit/", editHandler)
+	http.HandleFunc("/save/", saveHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
-	// p1 := &Page{Title: "TestPage", Body: []byte("This is a sample Page.")}
-	// p1.save()
-	// p2, _ := loadPage("TestPage")
-	// fmt.Println(string(p2.Body))
 }
